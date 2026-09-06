@@ -246,13 +246,44 @@ function renderProject(projectIdx, imageIdx = 0) {
   projectIndexEl.textContent = String(projectIdx + 1).padStart(2, "0");
   projectTotalEl.textContent = String(PROJECTS.length).padStart(2, "0");
 
-  // slides
-  sliderTrack.innerHTML = project.images
-    .map((src) => `<div style="background-image:url('${src}')"></div>`)
+  // build the deck: [peek of previous project] + [this project's real images] + [peek of next project]
+  // the peeks stay put while you flip through this project's own images, so as you
+  // approach the last image the next project already starts creeping into view.
+  let html = "";
+  if (PROJECTS.length > 1) {
+    const prevProject = PROJECTS[(projectIdx - 1 + PROJECTS.length) % PROJECTS.length];
+    const prevImg = prevProject.images[prevProject.images.length - 1];
+    html += `<div class="slide slide-peek" data-role="prev-peek" style="background-image:url('${prevImg}')" title="${prevProject.title}"></div>`;
+  }
+  html += project.images
+    .map((src, i) => `<div class="slide" data-role="image" data-i="${i}" style="background-image:url('${src}')"></div>`)
     .join("");
+  if (PROJECTS.length > 1) {
+    const nextProject = PROJECTS[(projectIdx + 1) % PROJECTS.length];
+    const nextImg = nextProject.images[0];
+    html += `<div class="slide slide-peek" data-role="next-peek" style="background-image:url('${nextImg}')" title="${nextProject.title}"></div>`;
+  }
+  sliderTrack.innerHTML = html;
+
   sliderDots.innerHTML = project.images
     .map((_, i) => `<button data-i="${i}" aria-label="Gambar ${i + 1}"></button>`)
     .join("");
+
+  // clicking a peek card jumps straight to that project
+  const prevPeekEl = sliderTrack.querySelector('[data-role="prev-peek"]');
+  const nextPeekEl = sliderTrack.querySelector('[data-role="next-peek"]');
+  if (prevPeekEl) {
+    prevPeekEl.addEventListener("click", () => {
+      const idx = (currentProject - 1 + PROJECTS.length) % PROJECTS.length;
+      renderProject(idx, PROJECTS[idx].images.length - 1);
+    });
+  }
+  if (nextPeekEl) {
+    nextPeekEl.addEventListener("click", () => {
+      const idx = (currentProject + 1) % PROJECTS.length;
+      renderProject(idx, 0);
+    });
+  }
 
   goToImage(imageIdx, false);
 
@@ -261,15 +292,50 @@ function renderProject(projectIdx, imageIdx = 0) {
   );
 }
 
+// positions every card relative to the active one: center card up front,
+// this project's other images and the neighbouring projects' peeks fan out on each side
+function layoutSlides() {
+  const slides = Array.from(sliderTrack.children);
+  const activeIdx = slides.findIndex(
+    (slide) => slide.dataset.role === "image" && Number(slide.dataset.i) === currentImage
+  );
+
+  slides.forEach((slide, i) => {
+    const offset = i - activeIdx;
+    const abs = Math.abs(offset);
+
+    slide.classList.toggle("is-active", offset === 0);
+
+    if (abs > 2) {
+      slide.style.transform = `translateX(-50%) translateX(${offset > 0 ? 140 : -140}%) scale(.7)`;
+      slide.style.opacity = "0";
+      slide.style.zIndex = "0";
+      slide.style.pointerEvents = "none";
+      return;
+    }
+
+    const translate = offset * 62; // % of card's own width per step
+    const translateY = abs * 16; // px — side cards sit a touch lower, like a soft cascade
+    const scale = 1 - abs * 0.1;
+    slide.style.transform = `translateX(-50%) translateX(${translate}%) translateY(${translateY}px) scale(${scale})`;
+    slide.style.opacity = String(1 - abs * 0.3);
+    slide.style.zIndex = String(10 - abs);
+    slide.style.pointerEvents = offset === 0 ? "auto" : slide.classList.contains("slide-peek") ? "auto" : "none";
+  });
+}
+
 function goToImage(idx, animate = true) {
   const project = PROJECTS[currentProject];
   const clamped = (idx + project.images.length) % project.images.length;
   currentImage = clamped;
-  sliderTrack.style.transition = animate ? "" : "none";
-  sliderTrack.style.transform = `translateX(-${clamped * 100}%)`;
+  if (!animate) sliderTrack.classList.add("no-anim");
+  layoutSlides();
   sliderDots.querySelectorAll("button").forEach((dot, i) =>
     dot.classList.toggle("active", i === clamped)
   );
+  if (!animate) {
+    requestAnimationFrame(() => requestAnimationFrame(() => sliderTrack.classList.remove("no-anim")));
+  }
 }
 
 prevBtn.addEventListener("click", () => {
