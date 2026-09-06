@@ -410,6 +410,201 @@ document.getElementById("statProjects").textContent = ABOUT.projectsCount + "+";
 document.getElementById("statCert").textContent = CERTIFICATIONS.length;
 document.getElementById("aboutDesc").textContent = ABOUT.aboutDescription;
 
+/* 7a. reveal-on-scroll for the about text column — staggered per element
+   (via CSS nth-child delays) so it doesn't pop in all at once/monotonously */
+(function initAboutReveal() {
+  const aboutContent = document.querySelector(".about-content");
+  if (!aboutContent) return;
+  const observer = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          obs.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.25 }
+  );
+  observer.observe(aboutContent);
+})();
+
+/* 7b. drifting dust particles scattered across the About section (CSS-only
+   animation, works even where the Three.js visual is hidden on small screens) */
+(function initAboutDust() {
+  const section = document.getElementById("about");
+  if (!section) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const dustColors = ["#93c5fd", "#c4b5fd", "#6ee7b7"];
+  const wrap = document.createElement("div");
+  wrap.className = "about-dust";
+  wrap.setAttribute("aria-hidden", "true");
+
+  const COUNT = 26;
+  for (let i = 0; i < COUNT; i++) {
+    const dot = document.createElement("span");
+    const size = (Math.random() * 3 + 2).toFixed(1); // 2–5px
+    const left = (Math.random() * 100).toFixed(1);
+    const top = (Math.random() * 100).toFixed(1);
+    const duration = (Math.random() * 8 + 7).toFixed(1); // 7–15s
+    const delay = (-Math.random() * duration).toFixed(1); // negative = desync the pulse
+    const driftX = (Math.random() * 120 - 60).toFixed(0);
+    const driftY = (Math.random() * -160 - 60).toFixed(0);
+    const opacity = (Math.random() * 0.3 + 0.22).toFixed(2);
+
+    dot.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${left}%; top:${top}%;
+      background:${dustColors[i % dustColors.length]};
+      animation-duration:${duration}s;
+      animation-delay:${delay}s;
+      --dust-x:${driftX}px; --dust-y:${driftY}px; --dust-opacity:${opacity};
+    `;
+    wrap.appendChild(dot);
+  }
+  section.prepend(wrap);
+})();
+
+/* ---------- 7b. ABOUT VISUAL — Three.js wireframe polyhedron ---------- */
+/* Sengaja minimalis (cuma garis, tanpa isi/tanpa warna solid) biar senada
+   dengan gaya outline pada teks "FULL STACK ENGINEER" di Hero. Warnanya
+   otomatis ikut berubah saat tema gelap/terang diganti. */
+
+(function initAboutVisual() {
+  const container = document.getElementById("aboutVisual");
+  if (!container || typeof THREE === "undefined") return; // graceful fallback
+
+  const getLineColor = () =>
+    getComputedStyle(document.documentElement).getPropertyValue("--text").trim() || "#ffffff";
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.set(0, 0, 4.6);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  // --- monochrome wireframes (match the outline-text look of the Hero) ---
+  const outerGeo = new THREE.IcosahedronGeometry(1.5, 0);
+  const outerMat = new THREE.LineBasicMaterial({ color: getLineColor(), transparent: true, opacity: 0.9 });
+  const outerMesh = new THREE.LineSegments(new THREE.EdgesGeometry(outerGeo), outerMat);
+  scene.add(outerMesh);
+
+  const innerGeo = new THREE.OctahedronGeometry(0.8, 0);
+  const innerMat = new THREE.LineBasicMaterial({ color: getLineColor(), transparent: true, opacity: 0.35 });
+  const innerMesh = new THREE.LineSegments(new THREE.EdgesGeometry(innerGeo), innerMat);
+  scene.add(innerMesh);
+
+  // a wide tilted ring orbiting around everything, filling more of the frame
+  const ringGeo = new THREE.TorusGeometry(2.15, 0.006, 8, 96);
+  const ringMat = new THREE.MeshBasicMaterial({ color: getLineColor(), transparent: true, opacity: 0.28 });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = Math.PI / 2.4;
+  ring.rotation.y = 0.3;
+  scene.add(ring);
+
+  // --- soft pastel particle dust, to add colour + fill the empty space around the shapes ---
+  const softPalette = [
+    new THREE.Color("#93c5fd"), // soft blue
+    new THREE.Color("#c4b5fd"), // soft lavender
+    new THREE.Color("#6ee7b7"), // soft mint
+  ];
+  const PARTICLE_COUNT = 160;
+  const positions = new Float32Array(PARTICLE_COUNT * 3);
+  const colors = new Float32Array(PARTICLE_COUNT * 3);
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    // scatter inside a soft sphere shell so it frames the wireframes rather than filling the middle
+    const radius = 1.9 + Math.random() * 1.3;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(Math.random() * 2 - 1);
+    positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+    positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+    positions[i * 3 + 2] = radius * Math.cos(phi);
+
+    const c = softPalette[i % softPalette.length];
+    colors[i * 3] = c.r;
+    colors[i * 3 + 1] = c.g;
+    colors[i * 3 + 2] = c.b;
+  }
+  const particleGeo = new THREE.BufferGeometry();
+  particleGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  particleGeo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+
+  // soft round glow sprite so dots read as gentle light, not hard squares
+  const spriteCanvas = document.createElement("canvas");
+  spriteCanvas.width = spriteCanvas.height = 64;
+  const ctx = spriteCanvas.getContext("2d");
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, "rgba(255,255,255,1)");
+  grad.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 64, 64);
+  const spriteTexture = new THREE.CanvasTexture(spriteCanvas);
+
+  const particleMat = new THREE.PointsMaterial({
+    size: 0.12,
+    map: spriteTexture,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.85,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  const particles = new THREE.Points(particleGeo, particleMat);
+  scene.add(particles);
+
+  function resize() {
+    const w = container.clientWidth || 300;
+    const h = container.clientHeight || w;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  // gentle drift toward the cursor for a subtle sense of depth, without being distracting
+  let targetX = 0, targetY = 0;
+  window.addEventListener("pointermove", (e) => {
+    targetX = (e.clientX / window.innerWidth - 0.5) * 0.6;
+    targetY = (e.clientY / window.innerHeight - 0.5) * 0.6;
+  });
+
+  // re-tint the monochrome wireframes whenever the theme toggle changes --text
+  // (the pastel particles stay as-is — they're the deliberate colour accent)
+  const themeSync = new MutationObserver(() => {
+    const c = new THREE.Color(getLineColor());
+    outerMat.color.copy(c);
+    innerMat.color.copy(c);
+    ringMat.color.copy(c);
+  });
+  themeSync.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // pause the animation while it's off-screen to save battery/CPU
+  let isVisible = true;
+  new IntersectionObserver((entries) => {
+    entries.forEach((entry) => (isVisible = entry.isIntersecting));
+  }).observe(container);
+
+  const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!isVisible) return;
+    const t = clock.getElapsedTime();
+    outerMesh.rotation.x = t * 0.18 + targetY;
+    outerMesh.rotation.y = t * 0.24 + targetX;
+    innerMesh.rotation.x = -t * 0.26 - targetY;
+    innerMesh.rotation.y = -t * 0.3 - targetX;
+    ring.rotation.z = t * 0.12;
+    particles.rotation.y = t * 0.05 + targetX * 0.4;
+    particles.rotation.x = t * 0.035 + targetY * 0.4;
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+
 /* ---------- 8. CERTIFICATIONS ---------- */
 
 const certGrid = document.getElementById("certGrid");
