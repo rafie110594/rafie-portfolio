@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rafie — Full Stack Engineer</title>
+<meta name="description" content="Portofolio Rafie, Full Stack Engineer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="#hero" class="logo">
+      <span class="logo-mark">R</span>
+      <span class="logo-name">RAFIE</span>
+    </a>
+
+    <nav class="nav-menu" id="navMenu">
+      <a href="#work" data-nav>Work</a>
+      <a href="#skill" data-nav>Skill</a>
+      <a href="#about" data-nav>About</a>
+      <a href="#certification" data-nav>Certification</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button id="themeToggle" class="icon-btn" aria-label="Ganti tema">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="https://api.whatsapp.com/send/?phone=6281807753340&text&type=phone_number&app_absent=0" class="btn-pill">Hire Me</a>
+    </div>
+
+    <button class="nav-burger" id="navBurger" aria-label="Buka menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section id="hero" class="hero">
+  <div class="hero-marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>FULL&nbsp;STACK&nbsp;ENGINEER&nbsp;•&nbsp;</span>
+      <span>FULL&nbsp;STACK&nbsp;ENGINEER&nbsp;•&nbsp;</span>
+      <span>FULL&nbsp;STACK&nbsp;ENGINEER&nbsp;•&nbsp;</span>
+      <span>FULL&nbsp;STACK&nbsp;ENGINEER&nbsp;•&nbsp;</span>
+    </div>
+  </div>
+
+  <div class="hero-photo-wrap">
+    <img src="assets/Rafie.png" alt="Foto Rafie" class="hero-photo" id="heroPhoto">
+    <div class="hero-photo-fallback" id="heroPhotoFallback">RAFIE<br><span>Ganti assets/photo-hero.jpg</span></div>
+  </div>
+
+  <div class="scroll-indicator" aria-hidden="true">
+    <span>SCROLL&nbsp;DOWN</span>
+  </div>
+</section>
+
+<!-- ============ WORK GALLERY ============ -->
+<section id="work" class="section work-section">
+  <p class="eyebrow">Portfolio</p>
+  <h2 class="type-heading" data-type-text="Work Gallery">&nbsp;</h2>
+
+  <div class="work-grid">
+    <div class="work-info">
+      <span class="work-index"><span id="projectIndex">01</span> / <span id="projectTotal">04</span></span>
+      <h3 id="projectTitle">—</h3>
+      <p id="projectDesc">—</p>
+      <div class="stack-badges" id="projectStack"></div>
+      <a href="#" id="projectLink" class="view-project" target="_blank" rel="noopener">
+        <span>View Project</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"/></svg>
+      </a>
+    </div>
+
+    <div class="work-slider">
+      <div class="slider-viewport">
+        <div class="slider-track" id="sliderTrack"></div>
+      </div>
+      <div class="slider-controls">
+        <button class="slider-arrow" id="prevSlide" aria-label="Sebelumnya">‹</button>
+        <div class="slider-dots" id="sliderDots"></div>
+        <button class="slider-arrow" id="nextSlide" aria-label="Berikutnya">›</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SKILL ============ -->
+<section id="skill" class="section skill-section">
+  <p class="eyebrow">Capabilities</p>
+  <h2 class="type-heading" data-type-text="Skill">&nbsp;</h2>
+
+  <div class="skill-list" id="skillList"></div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section id="about" class="section about-section">
+  <p class="eyebrow">About Me</p>
+  <h2 class="type-heading" data-type-text="Who I Am">&nbsp;</h2>
+
+  <div class="about-grid">
+    <div class="about-photo-col">
+      <div class="about-photo-wrap">
+        <img src="assets/Rafie.png" alt="Foto Rafie" id="aboutPhoto">
+        <div class="about-photo-fallback" id="aboutPhotoFallback">R</div>
+      </div>
+    </div>
+
+    <div class="about-content">
+      <p class="about-role">Full Stack Engineer</p>
+      <h3 class="about-name">Muhammad Rafie Rafsanjani Harmain</h3>
+
+      <div class="about-stats">
+        <div class="stat">
+          <span class="stat-num" id="statProjects">0</span>
+          <span class="stat-label">Projects</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num" id="statCert">0</span>
+          <span class="stat-label">Certification</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">★</span>
+          <span class="stat-label">Best Graduate</span>
+        </div>
+      </div>
+
+      <p class="about-desc" id="aboutDesc">—</p>
+
+      <div class="about-actions">
+        <a href="https://api.whatsapp.com/send/?phone=6281807753340&text&type=phone_number&app_absent=0" class="btn-pill">Hire Me</a>
+        <a href="assets/CV - Muhammad Rafie Rafsanjani Harmain - 2026.pdf" id="cvLink" class="link-underline" target="_blank" rel="noopener">Download CV</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CERTIFICATION ============ -->
+<section id="certification" class="section cert-section">
+  <p class="eyebrow">Proof of Work</p>
+  <h2 class="type-heading" data-type-text="Certification">&nbsp;</h2>
+
+  <div class="cert-grid" id="certGrid"></div>
+</section>
+
+<!-- ============ FOOTER / CONTACT ============ -->
+<footer id="contact" class="footer">
+  <div class="footer-inner">
+    <div class="footer-left">
+      <span class="logo-mark">R</span>
+      <div>
+        <p class="footer-name">Rafie</p>
+        <p class="footer-role">Full Stack Engineer</p>
+      </div>
+    </div>
+    <div class="footer-right">
+      <a href="mailto:rafie110504@gmail.com">rafie110504@gmail.com</a>
+      <a href="https://github.com/rafie110594" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/muhammad-rafie-rafsanjani-harmain-5a266427a/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+  <p class="footer-copy">© <span id="year"></span> Rafie. Semua hak cipta dilindungi.</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
